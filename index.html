@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Academy | Learn & Grow</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #eab308;
+            --text-main: #334155;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-size: 1.25rem; font-weight: 700; }
+        .logo span { color: var(--accent); }
+
+        .hero {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 { font-size: 1.3rem; color: var(--primary); margin-bottom: 1rem; }
+
+        .portal-trigger { cursor: pointer; user-select: none; }
+
+        .signature-credit {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent);
+            z-index: 1000;
+        }
+
+        .signature-credit span { color: var(--accent); }
+
+        footer {
+            background-color: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Apex<span>Learning</span> Portal</div>
+    </header>
+
+    <section class="hero">
+        <h1>Welcome to Your Learning Dashboard</h1>
+        <p>Explore resources structured to help you master foundational core school modules created by Hardeep Singh.</p>
+    </section>
+
+    <main class="container">
+        <div class="grid">
+            <div class="card">
+                <h3 class="portal-trigger" id="mathModule">Mathematics Module ⚡</h3>
+                <p>Dive deep into Coordinate Geometry, Linear Equations, and advanced mental math Abacus frameworks built for competitive speeds.</p>
+            </div>
+            <div class="card">
+                <h3>Science Chamber</h3>
+                <p>Investigate the principles of physics, from chemical composition of matter to fundamental laws governing cellular structure biology.</p>
+            </div>
+            <div class="card">
+                <h3>Computer Science Lab</h3>
+                <p>Master clean script execution logic. Learn data sequences using Python variables and build frontend wireframes with modern responsive CSS layouts.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="signature-credit">
+        Created by: <span id="liveCreditName">Hardeep Singh</span>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Core Curriculum Framework.</p>
+    </footer>
+
+    <script>
+        // Synchronize display text with master variables
+        const storedName = localStorage.getItem('adminName') || "Hardeep Singh";
+        document.getElementById('liveCreditName').textContent = storedName;
+
+        document.getElementById('mathModule').addEventListener('click', function() {
+            window.location.href = "login.html";
+        });
+    </script>
+</body>
+</html>

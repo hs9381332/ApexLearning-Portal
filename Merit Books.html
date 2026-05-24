@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 9 Study Dashboard</title>
+  <style>
+    /* Full screen layout */
+    .dashboard {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: #f3f4f6;
+      box-sizing: border-box;
+    }
+
+    /* Left panel for Profile Card */
+    .sidebar-panel {
+      flex: 1;
+      max-width: 320px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background-color: #f9fafb;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .profile-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 85px;
+      height: 85px;
+      background: #4f46e5;
+      color: white;
+      font-size: 26px;
+      font-weight: bold;
+      line-height: 85px;
+      border-radius: 50%;
+      margin: 0 auto 20px auto;
+    }
+
+    .profile-card h2 {
+      margin: 0 0 8px 0;
+      color: #111827;
+      font-size: 24px;
+    }
+
+    .title {
+      color: #4f46e5;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .bio {
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Right panel for Navigation & Textbook Viewer */
+    .content-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Tab bar styling with smooth scrolling support for small screens */
+    .tab-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: #ffffff;
+      color: #4b5563;
+      border: 1px solid #e5e7eb;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    /* Style for the active/selected book button */
+    .tab-btn.active {
+      background: #4f46e5;
+      color: #ffffff;
+      border-color: #4f46e5;
+    }
+
+    /* Container holding the iframe */
+    .document-wrapper {
+      flex-grow: 1;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+    }
+
+    .viewer-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+    
+    <!-- Profile Sidebar Section -->
+    <aside class="sidebar-panel">
+      <div class="profile-card">
+        <div class="avatar">HS</div>
+        <h2>Hardeep Singh</h2>
+        <p class="title">Web Developer & Student</p>
+        <p class="bio">Exploring frontend development, Python coding, and building cool web projects.</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Section -->
+    <main class="content-panel">
+      
+      <!-- Interactive Navigation Tabs with the new Hindi addition -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="loadBook('https://study.goyalsonline.com/sample_ebooks/Gateway-to-Science-Biology-Class-9-(2026-27)/index.html', this)">
+          Biology
+        </button>
+        <button class="tab-btn" onclick="loadBook('https://study.goyalsonline.com/sample_ebooks/Gateway-to-Science-Physics-Class-9-(2026-27)/index.html', this)">
+          Physics
+        </button>
+        <button class="tab-btn" onclick="loadBook('https://study.goyalsonline.com/sample_ebooks/Gateway-to-Social-Science-Class-9-Part-1-(2026-27)/index.html', this)">
+          Social Science (Part 1)
+        </button>
+        <button class="tab-btn" onclick="loadBook('https://study.goyalsonline.com/sample_ebooks/Gateway-to-Social-Science-Class-9-Part-2-(2026-27)/index.html', this)">
+          Social Science (Part 2)
+        </button>
+        <button class="tab-btn" onclick="loadBook('https://study.goyalsonline.com/sample_ebooks/hindi-vyakaran-sudha-class-9-(2026-27)/index.html', this)">
+          Hindi Vyakaran
+        </button>
+      </div>
+
+      <!-- Book Viewer Window -->
+      <div class="document-wrapper">
+        <iframe 
+          id="book-viewer"
+          class="viewer-frame"
+          src="https://study.goyalsonline.com/sample_ebooks/Gateway-to-Science-Biology-Class-9-(2026-27)/index.html"
+          title="E-Book Viewer">
+        </iframe>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- JavaScript to handle switching links and tabs -->
+  <script>
+    function loadBook(bookUrl, buttonElement) {
+      // Update the iframe view
+      document.getElementById('book-viewer').src = bookUrl;
+      
+      // Update active tab buttons visual status
+      const buttons = document.querySelectorAll('.tab-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      
+      buttonElement.classList.add('active');
+    }
+  </script>
+
+</body>
+</html>

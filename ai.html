@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Core - Live Google AI Terminal</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent: #eab308;
+            --canvas: #f1f5f9;
+            --card: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --ai-bubble: #1e293b;
+            --user-bubble: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--canvas); display: flex; min-height: 100vh; }
+
+        /* Navigation Sidebar */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+        .sidebar-brand { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; }
+        .sidebar-brand span { color: var(--accent); }
+        .nav-links { list-style: none; margin-bottom: 2rem; }
+        .nav-links li { padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .nav-links li:hover { background: rgba(255,255,255,0.1); }
+        .nav-links li.active { background-color: var(--accent); color: var(--primary); font-weight: 600; }
+        .nav-links a { text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; }
+        .back-dash-btn { background-color: #475569; color: white; text-align: center; padding: 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; margin-top: auto; transition: background 0.2s; }
+        .back-dash-btn:hover { background-color: #334155; }
+
+        /* Main Workspace Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; background-color: #f8fafc; }
+        .ai-header { padding: 1.5rem 2.5rem; background: white; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .ai-header h1 { color: var(--primary); font-size: 1.4rem; }
+        .engine-badge { display: inline-block; background-color: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bfdbfe; }
+
+        /* Chat History Feed */
+        .chat-container { flex: 1; overflow-y: auto; padding: 2rem 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .chat-message { display: flex; flex-direction: column; max-width: 80%; padding: 1rem 1.25rem; border-radius: 12px; font-size: 1rem; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.02); white-space: pre-wrap; }
+        .chat-message .sender-tag { font-size: 0.75rem; font-weight: bold; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .chat-message .time-tag { font-size: 0.7rem; margin-top: 0.4rem; text-align: right; opacity: 0.6; }
+
+        .message-ai { background-color: var(--ai-bubble); color: var(--text-light); align-self: flex-start; border-top-left-radius: 2px; }
+        .message-ai .sender-tag { color: var(--accent); }
+        .message-user { background-color: var(--user-bubble); color: white; align-self: flex-end; border-top-right-radius: 2px; }
+        .message-user .sender-tag { color: #bfdbfe; }
+        .message-error { background-color: #fee2e2; color: #991b1b; align-self: center; border-radius: 8px; font-size: 0.9rem; }
+
+        /* Action Prompt Chips */
+        .suggestions-row { display: flex; gap: 0.75rem; padding: 0.5rem 2.5rem; overflow-x: auto; background-color: #f8fafc; }
+        .prompt-chip { background: white; border: 1px solid #cbd5e1; padding: 0.6rem 1rem; border-radius: 50px; font-size: 0.85rem; font-weight: 500; color: #475569; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .prompt-chip:hover { border-color: var(--user-bubble); color: var(--user-bubble); background: #eff6ff; }
+
+        /* Input Controls Bar */
+        .input-bar-container { padding: 1.5rem 2.5rem; background: white; border-top: 1px solid #e2e8f0; }
+        .input-form { display: flex; gap: 0.75rem; max-width: 1000px; margin: 0 auto; width: 100%; }
+        .chat-textarea { flex: 1; padding: 0.9rem 1.2rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; resize: none; height: 50px; line-height: 1.4; }
+        .chat-textarea:focus { border-color: var(--user-bubble); }
+        .send-btn { background-color: var(--primary); color: white; border: none; padding: 0 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 8px; cursor: pointer; height: 50px; display: flex; align-items: center; justify-content: center; }
+        .send-btn:hover { background-color: var(--sidebar-bg); }
+
+        /* Thinking State */
+        .thinking-bubble { display: none; align-self: flex-start; background: #e2e8f0; color: #334155; padding: 1rem 1.25rem; border-radius: 12px; border-top-left-radius: 2px; font-size: 0.95rem; font-style: italic; }
+    </style>
+
+    <!-- IMPORTING GOOGLE'S OFFICIAL GEN AI SDK FOR BROWSERS -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">Gemini<span>Core</span></div>
+            <ul class="nav-links">
+                <li class="active">AI Cloud Terminal</li>
+                <li><a href="codju.html">Codju Portal</a></li>
+                <li><a href="Merit box.html">Merit Box</a></li>
+                <li><a href="Merit books.html">Merit Books Vault</a></li>
+            </ul>
+        </div>
+        <a href="dashboard.html" class="back-dash-btn">← Back to Dashboard</a>
+    </aside>
+
+    <!-- Main Live Chat Window Workspace -->
+    <main class="main-content">
+        <div class="ai-header">
+            <h1>Gemini Live API Interface</h1>
+            <span class="engine-badge">Gemini 2.5 Flash Connected</span>
+        </div>
+
+        <div id="chatContainer" class="chat-container">
+            <div class="chat-message message-ai">
+                <div class="sender-tag">Gemini Engine</div>
+                <div class="message-text">Live Google AI Studio gateway established successfully. I can now access the internet backend to review your programming code, solve math proofs, or look up information. What are we building today?</div>
+                <div class="time-tag" id="initialTime">00:00</div>
+            </div>
+
+            <div id="thinkingBubble" class="thinking-bubble">
+                Gemini is communicating with Google AI Studio servers...
+            </div>
+        </div>
+
+        <!-- Quick Launch Action Suggestions Row -->
+        <div class="suggestions-row">
+            <div class="prompt-chip" onclick="applySuggestion('Write a clean Python program using loops to find duplicate items in a list.')">Find Duplicates in Python</div>
+            <div class="prompt-chip" onclick="applySuggestion('Explain coordinate geometry formulas for internal section division.')">Section Formula Math</div>
+            <div class="prompt-chip" onclick="applySuggestion('What are some essential tips for keeping an HTML/CSS layout clean and organized?')">Web Design Tips</div>
+        </div>
+
+        <!-- Input Form Bar Container -->
+        <div class="input-bar-container">
+            <form id="chatForm" class="input-form">
+                <textarea id="userInput" class="chat-textarea" placeholder="Ask anything..." required></textarea>
+                <button type="submit" class="send-btn">Transmit</button>
+            </form>
+        </div>
+    </main>
+
+    <script type="module">
+        // Importing Google's Generative AI client module
+        import { GoogleGenAI } from '@google/genai';
+
+        // PLACE YOUR GOOGLE AI STUDIO API KEY HERE
+        const API_KEY = "AIzaSyDKY_D-YiAs0cOYbhVOS_O4QI8ckuoscEw";
+
+        // Initializing the real Google AI client backbone framework
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
+
+        document.getElementById('initialTime').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const chatContainer = document.getElementById('chatContainer');
+        const thinkingBubble = document.getElementById('thinkingBubble');
+
+        userInput.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.requestSubmit();
+            }
+        });
+
+        window.applySuggestion = function(text) {
+            userInput.value = text;
+            userInput.focus();
+        }
+
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const messageText = userInput.value.trim();
+            if(!messageText) return;
+
+            // 1. Render user text bubble onscreen instantly
+            appendMessage("User Operator", messageText, "message-user");
+            userInput.value = '';
+            
+            showThinkingState(true);
+            
+            try {
+                // 2. Making a direct live connection request to Google AI Studio API servers
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: messageText,
+                });
+
+                showThinkingState(false);
+                
+                // 3. Render real AI answer response text directly into the page stream layout
+                if (response && response.text) {
+                    appendMessage("Gemini Core", response.text, "message-ai");
+                } else {
+                    appendMessage("System Error", "Received an empty response packet from the API.", "message-error");
+                }
+
+            } catch (error) {
+                showThinkingState(false);
+                console.error(error);
+                appendMessage("System Error", "Connection failed. Please verify that your Google AI Studio API key is copied accurately inside the script code.", "message-error");
+            }
+        });
+
+        function appendMessage(sender, text, className) {
+            const timeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${className}`;
+            
+            const senderTag = document.createElement('div');
+            senderTag.className = 'sender-tag';
+            senderTag.textContent = sender;
+
+            const textContainer = document.createElement('div');
+            textContainer.className = 'message-text';
+            textContainer.textContent = text; 
+
+            const timeTag = document.createElement('div');
+            timeTag.className = 'time-tag';
+            timeTag.textContent = timeString;
+
+            msgDiv.appendChild(senderTag);
+            msgDiv.appendChild(textContainer);
+            msgDiv.appendChild(timeTag);
+            
+            chatContainer.insertBefore(msgDiv, thinkingBubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showThinkingState(shouldShow) {
+            thinkingBubble.style.display = shouldShow ? 'block' : 'none';
+            if(shouldShow) chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Hub</title>
+  <style>
+    /* Full screen dashboard layout split into two columns */
+    .dashboard {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: #f3f4f6;
+      box-sizing: border-box;
+    }
+
+    /* Left panel for your Profile Card */
+    .sidebar-panel {
+      flex: 1;
+      max-width: 350px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background-color: #f9fafb;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .profile-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 85px;
+      height: 85px;
+      background: #4f46e5;
+      color: white;
+      font-size: 26px;
+      font-weight: bold;
+      line-height: 85px;
+      border-radius: 50%;
+      margin: 0 auto 20px auto;
+    }
+
+    .profile-card h2 {
+      margin: 0 0 8px 0;
+      color: #111827;
+      font-size: 24px;
+    }
+
+    .title {
+      color: #4f46e5;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .bio {
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Right panel for the full Document viewer */
+    .content-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .document-wrapper {
+      flex-grow: 1;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden; /* Keeps embedded edges completely clean */
+      border: 1px solid #e5e7eb;
+      position: relative;
+    }
+
+    /* Target the embed element to occupy 100% height and width */
+    .viewer-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard">
+    
+    <!-- Profile Sidebar Section -->
+    <aside class="sidebar-panel">
+      <div class="profile-card">
+        <div class="avatar">HS</div>
+        <h2>Hardeep Singh</h2>
+        <p class="title">Web Developer & Student</p>
+        <p class="bio">Exploring frontend development, Python coding, and building cool web projects.</p>
+      </div>
+    </aside>
+
+    <!-- Main Document Section -->
+    <main class="content-panel">
+      <div class="document-wrapper">
+        <iframe 
+          class="viewer-frame"
+          src="https://meritbox.app//"
+          title="Diksha Viewer"
+          allow="autoplay">
+        </iframe>
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>

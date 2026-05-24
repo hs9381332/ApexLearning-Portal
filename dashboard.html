@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Control Panel</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent: #eab308;
+            --canvas: #f1f5f9;
+            --card: #ffffff;
+            --success: #22c55e;
+            --error: #ef4444;
+            --shortcut-btn: #3b82f6;
+            --purple-btn: #8b5cf6;
+            --emerald-btn: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--canvas); display: flex; min-height: 100vh; }
+
+        /* Navigation Layout design elements */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar-brand { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; }
+        .sidebar-brand span { color: var(--accent); }
+        .nav-links { list-style: none; margin-bottom: 2rem; }
+        .nav-links li { padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .nav-links li:hover { background: rgba(255,255,255,0.1); }
+        .nav-links li.active { background-color: var(--accent); color: var(--primary); font-weight: 600; }
+        .nav-links a { text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; }
+        .logout-btn { background-color: var(--error); color: white; text-align: center; padding: 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; margin-top: auto; }
+
+        /* Live Session Stopwatch Persistent Module Styles */
+        .timer-card { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center; }
+        .timer-card h4 { font-size: 0.8rem; text-transform: uppercase; tracking: 1px; color: #94a3b8; margin-bottom: 0.5rem; font-weight: 600; }
+        .timer-display { font-family: monospace; font-size: 1.8rem; font-weight: bold; color: var(--accent); margin-bottom: 0.75rem; text-shadow: 0 0 10px rgba(234, 179, 8, 0.2); }
+        .timer-controls { display: flex; gap: 0.4rem; justify-content: center; }
+        .timer-btn { border: none; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; color: white; }
+        .timer-btn-start { background-color: var(--emerald-btn); }
+        .timer-btn-start:hover { background-color: #059669; }
+        .timer-btn-pause { background-color: #f97316; }
+        .timer-btn-pause:hover { background-color: #ea580c; }
+        .timer-btn-reset { background-color: #64748b; }
+        .timer-btn-reset:hover { background-color: #475569; }
+
+        .main-content { flex: 1; padding: 2.5rem; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; }
+        .dash-header h1 { color: var(--primary); font-size: 1.8rem; }
+        .status-badge { display: inline-block; background-color: #dcfce7; color: #15803d; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; }
+
+        /* Dynamic View Switching mechanics */
+        .dashboard-panel { display: none; }
+        .dashboard-panel.active { display: block; }
+
+        .admin-card { background: var(--card); border-radius: 12px; padding: 2.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 700px; margin-bottom: 2rem; }
+        .admin-card h2 { margin-bottom: 1.5rem; color: var(--primary); font-size: 1.4rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
+        
+        .info-grid { display: grid; grid-template-columns: 180px 1fr; gap: 1.2rem; font-size: 1.05rem; }
+        .info-label { font-weight: 700; color: #64748b; }
+        .info-value { color: var(--primary); font-weight: 500; }
+
+        /* Shortcut Button & Grid Styling */
+        .shortcut-container { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px dashed #cbd5e1; }
+        .shortcut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 0.75rem; }
+        .shortcut-link-btn { display: inline-flex; align-items: center; justify-content: center; background-color: var(--shortcut-btn); color: white; text-decoration: none; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; text-align: center; }
+        .shortcut-link-btn:hover { background-color: #2563eb; }
+        .no-shortcut { color: #94a3b8; font-style: italic; font-size: 0.95rem; }
+
+        /* Document Table Styling */
+        .doc-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
+        .doc-table th, .doc-table td { border: 1px solid #e2e8f0; padding: 0.75rem; text-align: left; }
+        .doc-table th { background-color: #f8fafc; color: #475569; font-weight: 600; }
+        .doc-action-btn { background: none; border: none; color: #3b82f6; font-weight: 600; cursor: pointer; text-decoration: underline; margin-right: 0.5rem; font-size: 0.9rem; }
+        .doc-delete-btn { background: none; border: none; color: var(--error); font-weight: 600; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
+
+        /* Notes & Todo Elements */
+        .notepad-textarea { width: 100%; height: 220px; padding: 1rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 1rem; outline: none; line-height: 1.5; resize: vertical; }
+        .notepad-textarea:focus { border-color: var(--primary); }
+        .todo-list { list-style: none; margin-top: 1rem; }
+        .todo-item { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 0.5rem; }
+        .todo-checkbox-wrapper { display: flex; align-items: center; gap: 0.75rem; }
+        .todo-checkbox-wrapper input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .todo-text.completed { text-decoration: line-through; color: #94a3b8; }
+        .todo-del-btn { background: none; border: none; color: var(--error); font-size: 1.1rem; cursor: pointer; font-weight: bold; }
+
+        /* System Form Controls */
+        .form-input-group { margin-bottom: 1.25rem; }
+        .form-input-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.5rem; color: #475569; }
+        .form-input-group input, .form-input-group select { width: 100%; max-width: 400px; padding: 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 1rem; }
+        .form-input-group input:focus { border-color: var(--primary); }
+        
+        .action-btn { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .action-btn:hover { background-color: var(--sidebar-bg); }
+        
+        /* Interactive Validation Notifiers */
+        .toast-notification { background-color: var(--success); color: white; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; display: none; margin-top: 1rem; max-width: 400px; text-align: center; }
+        .error-notification { background-color: var(--error); color: white; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; display: none; margin-top: 1rem; max-width: 400px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <!-- Left System Navigation Layout -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">Admin<span>Suite</span></div>
+            <ul class="nav-links">
+                <li id="menuProfile" class="active" onclick="switchPanel('profile')">Authorized Profile</li>
+                <li id="menuNotes" onclick="switchPanel('notes')">Daily Notes & Tasks</li>
+                <li id="menuDocuments" onclick="switchPanel('documents')">Digital Vault Documents</li>
+                <li id="menuDiagnostics" onclick="switchPanel('diagnostics')">System Diagnostics</li>
+                <li id="menuSettings" onclick="switchPanel('settings')">System Configuration</li>
+                
+                <li><a href="codju.html">Codju Portal</a></li>
+                <li><a href="Merit box.html">Merit Box</a></li>
+                <li><a href="Merit books.html">Merit Books Vault</a></li>
+                <li><a href="ai.html">AI Cloud Terminal</a></li>
+            </ul>
+
+            <!-- PERSISTENT STOPWATCH SUBMODULE -->
+            <div class="timer-card">
+                <h4>Session Tracker</h4>
+                <div id="stopwatchDisplay" class="timer-display">00:00:00</div>
+                <div class="timer-controls">
+                    <button type="button" id="timerStartBtn" class="timer-btn timer-btn-start" onclick="startStopwatch()">Start</button>
+                    <button type="button" id="timerPauseBtn" class="timer-btn timer-btn-pause" onclick="pauseStopwatch()" style="display:none;">Pause</button>
+                    <button type="button" class="timer-btn timer-btn-reset" onclick="resetStopwatch()">Reset</button>
+                </div>
+            </div>
+        </div>
+        <a href="index.html" class="logout-btn">Exit Secure Terminal</a>
+    </aside>
+
+    <!-- Main Active Canvas Framework -->
+    <main class="main-content">
+        <div class="dash-header">
+            <h1 id="panelTitle">Administrative Management</h1>
+            <span class="status-badge">System Connected</span>
+        </div>
+
+        <!-- VIEW 1: CENTRAL ADMINISTRATIVE READOUTS -->
+        <div id="panelProfile" class="dashboard-panel active">
+            <div class="admin-card">
+                <h2>Authorized Profile Metadata</h2>
+                <div class="info-grid">
+                    <div class="info-label">Operator Identity:</div>
+                    <div class="info-value" id="viewName">Hardeep Singh</div>
+
+                    <div class="info-label">Assigned Jurisdiction:</div>
+                    <div class="info-value" id="viewCommission">Lehra Mohabbat Division / Bathinda Network</div>
+
+                    <div class="info-label">Security Role:</div>
+                    <div class="info-value">Root Platform Administrator</div>
+
+                    <div class="info-label">Access Level:</div>
+                    <div class="info-value" style="color: #ca8a04; font-weight:700;">Tier-1 Full Override</div>
+                </div>
+
+                <div class="shortcut-container">
+                    <h3 style="font-size: 1rem; color: #475569; margin-bottom: 0.75rem;">Web Dashboard Shortcuts</h3>
+                    <div id="shortcutDisplayZone" class="shortcut-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: DAILY NOTES & TASK REGISTRY -->
+        <div id="panelNotes" class="dashboard-panel">
+            <div class="admin-card">
+                <h2>Administrative Notepad Scratchpad</h2>
+                <textarea id="notepadArea" class="notepad-textarea" placeholder="Type quick notes here..."></textarea>
+                <div id="notepadStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.25rem; text-align:right;">Saved locally.</div>
+            </div>
+
+            <div class="admin-card">
+                <h2>Daily Mission Tasks Checklist</h2>
+                <form id="todoForm" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="todoInput" required placeholder="Add a new goal or homework item..." style="flex:1; padding:0.75rem; border:1.5px solid #cbd5e1; border-radius:6px; outline:none;">
+                    <button type="submit" class="action-btn" style="background-color: var(--emerald-btn);">Add Task</button>
+                </form>
+                <ul id="todoListElement" class="todo-list"></ul>
+            </div>
+        </div>
+
+        <!-- VIEW 3: DIGITAL VAULT DOCUMENTS HUB -->
+        <div id="panelDocuments" class="dashboard-panel">            
+            <div class="admin-card">                
+                <h2>Upload Secure Documents</h2>                
+                <form id="documentForm">                    
+                    <div class="form-input-group">                        
+                        <label for="docCustomName">Document Reference Name</label>                        
+                        <input type="text" id="docCustomName" required placeholder="e.g. Identity Proof, Homework Sheet, Syllabus Paper">                    
+                    </div>                    
+                    <div class="form-input-group">                        
+                        <label for="docFileInput">Select File from Computer</label>                        
+                        <input type="file" id="docFileInput" required>                    
+                    </div>                    
+                    <button type="submit" class="action-btn" style="background-color: var(--purple-btn);">Upload & Store Document</button>                    
+                    <div id="docToast" class="toast-notification">Document encrypted and stored successfully!</div>                
+                </form>            
+            </div>            
+            <div class="admin-card" style="max-width: 850px;">                
+                <h2>Stored System Documents</h2>                
+                <div style="overflow-x: auto;">                    
+                    <table class="doc-table">                        
+                        <thead>                            
+                            <tr>                                
+                                <th>Reference Name</th>                                
+                                <th>Original File Name</th>                                
+                                <th>File Size</th>                                
+                                <th>Actions</th>                            
+                            </tr>                        
+                        </thead>                        
+                        <tbody id="documentTableBody">                            
+                            <!-- Dynamic rows inject here -->                        
+                        </tbody>                    
+                    </table>                
+                </div>            
+            </div>        
+        </div>
+
+        <!-- VIEW 4: SYSTEM DIAGNOSTICS & ANALYTICS -->
+        <div id="panelDiagnostics" class="dashboard-panel">
+            <div class="admin-card">
+                <h2>Local Environment Telemetry</h2>
+                <div class="info-grid">
+                    <div class="info-label">Active Connection:</div>
+                    <div class="info-value" style="color:var(--success); font-weight:700;">Online Localhost</div>
+
+                    <div class="info-label">Primary Sandbox:</div>
+                    <div class="info-value">HTML5 / JavaScript Runtime</div>
+
+                    <div class="info-label">Shortcuts Map Size:</div>
+                    <div class="info-value" id="diagShortcutCount">0 Active Nodes</div>
+
+                    <div class="info-label">Database Status:</div>
+                    <div class="info-value" id="diagDbStatus">Connecting to IndexedDB...</div>
+                </div>
+                <button type="button" class="action-btn" onclick="refreshDiagnostics()" style="margin-top:1.5rem; background-color:#64748b;">Poll Active Metrics</button>
+            </div>
+        </div>
+
+        <!-- VIEW 5: SECURITY MODIFIERS & OPTIONS HUB -->
+        <div id="panelSettings" class="dashboard-panel">
+            <div class="admin-card">
+                <h2>System Parameters Modification Panel</h2>
+                <form id="modifierForm">
+                    <div class="form-input-group">
+                        <label for="inputName">Update Operator Name</label>
+                        <input type="text" id="inputName" required placeholder="e.g. Hardeep Singh">
+                    </div>
+                    <div class="form-input-group">
+                        <label for="inputCommission">Accepted Jurisdiction / Constituency</label>
+                        <select id="inputCommission">
+                            <option value="Lehra Mohabbat Division / Bathinda Network">Lehra Mohabbat Division / Bathinda Network</option>
+                            <option value="Bathinda Lok Sabha Central Hub">Bathinda Lok Sabha Central Hub</option>
+                            <option value="Punjab Academic Core Division">Punjab Academic Core Division</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="action-btn">Commit Global Changes</button>
+                    <div id="toast" class="toast-notification">Changes broadcasted successfully!</div>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h2>Custom Shortcut Integration</h2>
+                <form id="shortcutForm">
+                    <div class="form-input-group">
+                        <label for="shortcutLabel">Shortcut Name / Button Label</label>
+                        <input type="text" id="shortcutLabel" required placeholder="e.g. My Coding Project">
+                    </div>
+                    <div class="form-input-group">
+                        <label for="shortcutUrl">Target Website Destination URL</label>
+                        <input type="url" id="shortcutUrl" required placeholder="https://example.com">
+                    </div>
+                    <button type="submit" class="action-btn" style="background-color: #3b82f6;">Deploy Web Shortcut</button>
+                    <button type="button" class="action-btn" id="clearShortcutsBtn" style="background-color: #64748b; margin-left: 0.5rem;">Clear All Shortcuts</button>
+                    <div id="shortcutToast" class="toast-notification">Web shortcut saved to storage successfully!</div>
+                    <div id="shortcutLimitError" class="error-notification">Shortcut limit reached! (Maximum 6 shortcuts allowed)</div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db = null;
+        const dbName = "AdminVaultDB";
+        const storeName = "documents";
+        let stopwatchInterval = null;
+        let elapsedSeconds = 0;
+
+        // INDEXEDDB CONTROLLER ARCHITECTURE
+        function initIndexedDB() {
+            const request = indexedDB.open(dbName, 1);
+
+            request.onupgradeneeded = function(e) {
+                const database = e.target.result;
+                if (!database.objectStoreNames.contains(storeName)) {
+                    database.createObjectStore(storeName, { keyPath: "id", autoIncrement: true });
+                }
+            };
+
+            request.onsuccess = function(e) {
+                db = e.target.result;
+                document.getElementById('diagDbStatus').textContent = "Database Mounted & Ready";
+                renderStoredDocuments();
+                refreshDiagnostics();
+            };
+
+            request.onerror = function() {
+                console.error("Database initialization failed.");
+                document.getElementById('diagDbStatus').textContent = "Fault Threshold Encountered";
+            };
+        }
+
+        // DOCUMENT FILE STORAGE LOGIC
+        document.getElementById('documentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!db) {
+                alert("Database engine is not fully initialized yet.");
+                return;
+            }
+
+            const customNameInput = document.getElementById('docCustomName');
+            const fileInput = document.getElementById('docFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const docRecord = {
+                    customName: customNameInput.value.trim(),
+                    fileName: file.name,
+                    fileSize: (file.size / 1024).toFixed(2) + " KB",
+                    fileData: event.target.result, // Base64 encoding URL scheme
+                    timestamp: new Date().toLocaleString()
+                };
+
+                const transaction = db.transaction([storeName], "readwrite");
+                const store = transaction.objectStore(storeName);
+                const addRequest = store.add(docRecord);
+
+                addRequest.onsuccess = function() {
+                    customNameInput.value = '';
+                    fileInput.value = '';
+                    renderStoredDocuments();
+                    refreshDiagnostics();
+
+                    const toast = document.getElementById('docToast');
+                    toast.style.display = 'block';
+                    setTimeout(() => { toast.style.display = 'none'; }, 2500);
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function renderStoredDocuments() {
+            const tableBody = document.getElementById('documentTableBody');
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+
+            if (!db) return;
+
+            const transaction = db.transaction([storeName], "readonly");
+            const store = transaction.objectStore(storeName);
+            const getAllRequest = store.getAll();
+
+            getAllRequest.onsuccess = function() {
+                const records = getAllRequest.result;
+                if (records.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" style="color:#94a3b8; font-style:italic; text-align:center;">No secure files uploaded to the local vault yet.</td></tr>`;
+                    return;
+                }
+
+                records.forEach(doc => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight:600; color:var(--primary);">${doc.customName}</td>
+                        <td style="color:#475569;">${doc.fileName}</td>
+                        <td>${doc.fileSize}</td>
+                        <td>
+                            <button class="doc-action-btn" onclick="downloadDocument(${doc.id})">Open</button>
+                            <button class="doc-delete-btn" onclick="deleteDocument(${doc.id})">Purge</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            };
+        }
+
+        function downloadDocument(id) {
+            const transaction = db.transaction([storeName], "readonly");
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
+
+            request.onsuccess = function() {
+                const record = request.result;
+                if (record) {
+                    const newWindow = window.open();
+                    newWindow.document.write(`<title>${record.customName}</title><iframe src="${record.fileData}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
+            };
+        }
+
+        function deleteDocument(id) {
+            const transaction = db.transaction([storeName], "readwrite");
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(id);
+
+            request.onsuccess = function() {
+                renderStoredDocuments();
+                refreshDiagnostics();
+            };
+        }
+
+        // VIEW PANEL SWITCH ROUTER ENGINE
+        function switchPanel(panelType) {
+            document.querySelectorAll('.dashboard-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-links li').forEach(l => l.classList.remove('active'));
+            
+            if(panelType === 'profile') {
+                document.getElementById('panelProfile').classList.add('active');
+                document.getElementById('menuProfile').classList.add('active');
+                document.getElementById('panelTitle').textContent = "Administrative Management";
+            } else if(panelType === 'notes') {
+                document.getElementById('panelNotes').classList.add('active');
+                document.getElementById('menuNotes').classList.add('active');
+                document.getElementById('panelTitle').textContent = "Daily Notes & Mission Controls";
+            } else if(panelType === 'documents') {
+                document.getElementById('panelDocuments').classList.add('active');
+                document.getElementById('menuDocuments').classList.add('active');
+                document.getElementById('panelTitle').textContent = "Digital Vault Documents";
+                renderStoredDocuments();
+            } else if(panelType === 'diagnostics') {
+                document.getElementById('panelDiagnostics').classList.add('active');
+                document.getElementById('menuDiagnostics').classList.add('active');
+                document.getElementById('panelTitle').textContent = "System Analytics Logs";
+                refreshDiagnostics();
+            } else {
+                document.getElementById('panelSettings').classList.add('active');
+                document.getElementById('menuSettings').classList.add('active');
+                document.getElementById('panelTitle').textContent = "System Configuration Options";
+            }
+        }
+
+        // REFRESH & POLL DIAGNOSTICS LOGS
+        function refreshDiagnostics() {
+            let savedShortcuts = [];
+            try { savedShortcuts = JSON.parse(localStorage.getItem('adminShortcuts')) || []; } catch(e) {}
+            document.getElementById('diagShortcutCount').textContent = savedShortcuts.length + " Active Nodes";
+
+            if (db) {
+                const transaction = db.transaction([storeName], "readonly");
+                const store = transaction.objectStore(storeName);
+                const countRequest = store.count();
+                countRequest.onsuccess = function() {
+                    document.getElementById('diagDbStatus').textContent = `DB Connected (${countRequest.result} Files Cached)`;
+                };
+            }
+        }
+
+        // RUNTIME STOPWATCH LOGIC
+        function startStopwatch() {
+            if (stopwatchInterval) return;
+            document.getElementById('timerStartBtn').style.display = 'none';
+            document.getElementById('timerPauseBtn').style.display = 'inline-block';
+
+            stopwatchInterval = setInterval(() => {
+                elapsedSeconds++;
+                let hrs = Math.floor(elapsedSeconds / 3600);
+                let mins = Math.floor((elapsedSeconds % 3600) / 60);
+                let secs = elapsedSeconds % 60;
+
+                let displayHrs = hrs < 10 ? "0" + hrs : hrs;
+                let displayMins = mins < 10 ? "0" + mins : mins;
+                let displaySecs = secs < 10 ? "0" + secs : secs;
+
+                document.getElementById('stopwatchDisplay').textContent = `${displayHrs}:${displayMins}:${displaySecs}`;
+            }, 1000);
+        }
+
+        function pauseStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            document.getElementById('timerPauseBtn').style.display = 'none';
+            document.getElementById('timerStartBtn').style.display = 'inline-block';
+        }
+
+        function resetStopwatch() {
+            pauseStopwatch();
+            elapsedSeconds = 0;
+            document.getElementById('stopwatchDisplay').textContent = "00:00:00";
+        }
+
+        // LOCAL STORAGE CONFIGURATION & INITIALIZATION SETUP
+        function initData() {
+            if(!localStorage.getItem('adminName')) localStorage.setItem('adminName', 'Hardeep Singh');
+            if(!localStorage.getItem('adminCommission')) localStorage.setItem('adminCommission', 'Lehra Mohabbat Division / Bathinda Network');
+            if(!localStorage.getItem('adminShortcuts')) localStorage.setItem('adminShortcuts', JSON.stringify([]));
+            if(!localStorage.getItem('adminTodoList')) localStorage.setItem('adminTodoList', JSON.stringify([]));
+            if(!localStorage.getItem('adminNotepadData')) localStorage.setItem('adminNotepadData', '');
+            
+            document.getElementById('viewName').textContent = localStorage.getItem('adminName');
+            document.getElementById('viewCommission').textContent = localStorage.getItem('adminCommission');
+            document.getElementById('inputName').value = localStorage.getItem('adminName');
+            document.getElementById('inputCommission').value = localStorage.getItem('adminCommission');
+            document.getElementById('notepadArea').value = localStorage.getItem('adminNotepadData');
+            
+            renderShortcutButtons();
+            renderTodoList();
+            initIndexedDB();
+        }
+
+        function renderShortcutButtons() {
+            const displayZone = document.getElementById('shortcutDisplayZone');
+            let savedShortcuts = JSON.parse(localStorage.getItem('adminShortcuts')) || [];
+            if(savedShortcuts.length > 0) {
+                displayZone.innerHTML = savedShortcuts.map(s => `<a href="${s.url}" target="_blank" class="shortcut-link-btn">${s.label} ↗</a>`).join('');
+            } else {
+                displayZone.innerHTML = `<span class="no-shortcut" style="grid-column: 1 / -1;">No shortcuts configured yet.</span>`;
+            }
+        }
+
+        document.getElementById('modifierForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newName = document.getElementById('inputName').value.trim();
+            const newComm = document.getElementById('inputCommission').value;
+            localStorage.setItem('adminName', newName);
+            localStorage.setItem('adminCommission', newComm);
+            document.getElementById('viewName').textContent = newName;
+            document.getElementById('viewCommission').textContent = newComm;
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block'; setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        });
+
+        document.getElementById('shortcutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const label = document.getElementById('shortcutLabel');
+            const url = document.getElementById('shortcutUrl');
+            let saved = JSON.parse(localStorage.getItem('adminShortcuts')) || [];
+            if(saved.length >= 6) {
+                document.getElementById('shortcutLimitError').style.display = 'block';
+                setTimeout(() => { document.getElementById('shortcutLimitError').style.display = 'none'; }, 3000);
+                return;
+            }
+            saved.push({ label: label.value.trim(), url: url.value.trim() });
+            localStorage.setItem('adminShortcuts', JSON.stringify(saved));
+            label.value = ''; url.value = '';
+            renderShortcutButtons();
+            refreshDiagnostics();
+            document.getElementById('shortcutToast').style.display = 'block';
+            setTimeout(() => { document.getElementById('shortcutToast').style.display = 'none'; }, 2500);
+        });
+
+        document.getElementById('clearShortcutsBtn').addEventListener('click', function() {
+            localStorage.setItem('adminShortcuts', JSON.stringify([]));
+            renderShortcutButtons();
+            refreshDiagnostics();
+        });
+
+        document.getElementById('notepadArea').addEventListener('input', function(e) {
+            localStorage.setItem('adminNotepadData', e.target.value);
+        });
+
+        document.getElementById('todoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('todoInput');
+            let todoList = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            todoList.push({ id: Date.now(), text: input.value.trim(), done: false });
+            localStorage.setItem('adminTodoList', JSON.stringify(todoList));
+            input.value = '';
+            renderTodoList();
+        });
+
+        function renderTodoList() {
+            const list = document.getElementById('todoListElement');
+            list.innerHTML = '';
+            let todoList = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            if(todoList.length === 0) {
+                list.innerHTML = `<li style="color:#94a3b8; font-style:italic; font-size:0.95rem; padding:0.5rem 0;">No pending goals logged.</td>`;
+                return;
+            }
+            todoList.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "todo-item";
+                li.innerHTML = `
+                    <div class="todo-checkbox-wrapper">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onclick="toggleTodo(${item.id})">
+                        <span class="todo-text ${item.done ? 'completed' : ''}">${item.text}</span>
+                    </div>
+                    <button class="todo-del-btn" onclick="deleteTodo(${item.id})">&times;</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function toggleTodo(id) {
+            let list = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            list = list.map(i => i.id === id ? { ...i, done: !i.done } : i);
+            localStorage.setItem('adminTodoList', JSON.stringify(list));
+            renderTodoList();
+        }
+
+        function deleteTodo(id) {
+            let list = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            list = list.filter(i => i.id !== id);
+            localStorage.setItem('adminTodoList', JSON.stringify(list));
+            renderTodoList();
+        }
+
+        window.onload = initData;
+    </script>
+</body>
+</html>

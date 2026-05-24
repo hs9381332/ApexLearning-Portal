@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Portal | Admin Authentication</title>
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #eab308;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --bg-canvas: #f8fafc;
+            --error-color: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--bg-canvas); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        .login-container { background: #ffffff; width: 100%; max-width: 450px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .form-header { margin-bottom: 2rem; text-align: center; }
+        .form-header h1 { font-size: 1.75rem; color: var(--primary-dark); margin-bottom: 0.5rem; }
+        .form-header p { color: var(--text-muted); font-size: 0.95rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--primary-dark); }
+        .form-group input { width: 100%; padding: 0.85rem; border: 1.5px solid var(--border-color); border-radius: 8px; outline: none; }
+        .form-group input:focus { border-color: var(--primary-dark); }
+        .error-msg { color: var(--error-color); font-size: 0.9rem; margin-bottom: 1rem; display: none; text-align: center; font-weight: 500; }
+        .submit-btn { width: 100%; background-color: var(--primary-dark); color: white; border: none; padding: 1rem; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
+        .submit-btn:hover { background-color: var(--primary-light); }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="form-header">
+            <h1>Admin Authentication</h1>
+            <p>Access control center infrastructure</p>
+        </div>
+        <div id="errorMessage" class="error-msg">Incorrect credentials.</div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter admin user">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="submit-btn">Verify and Enter</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            const errorDisplay = document.getElementById('errorMessage');
+
+            if (user === "HardeepSingh" && pass === "SidhuHardeep6713@") {
+                window.location.href = "dashboard.html";
+            } else {
+                errorDisplay.style.display = "block";
+            }
+        });
+// Replace the old IF statement inside login.html with this dynamic version:
+const correctUser = "Ha";
+const correctPass = localStorage.getItem('adminPassword') || "SidhuHardeep6713@";
+
+if (user === correctUser && pass === correctPass) {
+    errorDisplay.style.display = "none";
+    window.location.href = "dashboard.html";
+} else {
+    errorDisplay.style.display = "block";
+}
+    </script>
+</body>
+</html>
