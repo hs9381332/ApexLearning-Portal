@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Core - Shared Cloud Vault</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent: #eab308;
+            --canvas: #f1f5f9;
+            --card: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --user-bubble: #3b82f6;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--canvas); display: flex; min-height: 100vh; overflow: hidden; }
+
+        /* Navigation Sidebar */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; height: 100vh; }
+        .sidebar-brand { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; }
+        .sidebar-brand span { color: var(--accent); }
+        .nav-links { list-style: none; margin-bottom: 2rem; }
+        .nav-links li { padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .nav-links li:hover { background: rgba(255,255,255,0.1); }
+        .nav-links li.active { background-color: var(--accent); color: var(--primary); font-weight: 600; }
+        .nav-links a { text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; }
+        .back-dash-btn { background-color: #475569; color: white; text-align: center; padding: 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; margin-top: auto; transition: background 0.2s; }
+        .back-dash-btn:hover { background-color: #334155; }
+
+        /* Main Structural Dashboard Viewport */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; background-color: #f8fafc; }
+        .vault-header { padding: 1.5rem 2.5rem; background: white; border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .vault-header h1 { color: var(--primary); font-size: 1.4rem; }
+        .sync-badge { display: inline-block; background-color: #dcfce7; color: #15803d; padding: 0.35rem 0.85rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0; }
+
+        /* Multi-Device Management Dashboard Layout Matrix */
+        .vault-grid { flex: 1; padding: 2rem 2.5rem; display: grid; grid-template-columns: 1fr; gap: 2rem; overflow-y: auto; }
+        
+        @media (min-width: 768px) {
+            .vault-grid { grid-template-columns: 1fr 1fr; }
+        }
+        
+        .full-width-card { grid-column: 1 / -1; }
+        
+        .panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+        .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        
+        /* Functional Interaction Components */
+        .input-field { width: 100%; padding: 0.75rem; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; outline: none; margin-bottom: 0.75rem; }
+        .input-field:focus { border-color: var(--user-bubble); }
+        .action-btn { background-color: var(--primary); color: white; border: none; padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .action-btn:hover { background-color: var(--sidebar-bg); }
+        .email-btn { background-color: var(--user-bubble); }
+        .email-btn:hover { background-color: #2563eb; }
+        .save-btn { background-color: var(--success); }
+        .save-btn:hover { background-color: #059669; }
+
+        .btn-group { display: flex; gap: 0.75rem; }
+
+        /* Realtime Task List Element Styling */
+        .task-list { max-height: 250px; overflow-y: auto; margin-bottom: 1rem; }
+        .task-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.5rem; }
+        .task-text { font-size: 0.95rem; color: var(--text-dark); flex: 1; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">Gemini<span>Core</span></div>
+            <ul class="nav-links">
+                <li><a href="ai-companion.html">AI Cloud Terminal</a></li>
+                <li class="active">Cloud Vault</li>
+                <li><a href="codju.html">Codju Portal</a></li>
+                <li><a href="Merit box.html">Merit Box</a></li>
+                <li><a href="Merit books.html">Merit Books Vault</a></li>
+            </ul>
+        </div>
+        <a href="dashboard.html" class="back-dash-btn">← Back to Dashboard</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="vault-header">
+            <h1>Shared Ecosystem Vault <span>// Cross-Device Document Center</span></h1>
+            <span class="sync-badge" id="statusIndicator">Ecosystem Connected</span>
+        </div>
+
+        <div class="vault-grid">
+            
+            <div class="panel-card full-width-card">
+                <div class="panel-title">
+                    <span>Cloud Multi-Device Scratchpad Document</span>
+                    <div class="btn-group">
+                        <button class="action-btn save-btn" onclick="uploadNotes()">Save System Changes</button>
+                        <button class="action-btn email-btn" onclick="dispatchEmail('Cloud Notepad Content', document.getElementById('notepadMemo').value)">✉ Email This Note</button>
+                    </div>
+                </div>
+                <textarea id="notepadMemo" class="input-field" style="height: 220px; resize: none; font-family: inherit; padding: 1rem;" placeholder="Draft letters, write notes, or paste documents here. Everything auto-saves when you click save and populates instantly to your other linked screens..."></textarea>
+            </div>
+
+            <div class="panel-card full-width-card">
+                <div>
+                    <div class="panel-title">Cross-Device Live Task Matrix</div>
+                    <div class="task-list" id="taskListViewbox"></div>
+                </div>
+                <div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="taskInputField" class="input-field" style="margin:0;" placeholder="Add a new task item...">
+                        <button class="action-btn" onclick="commitNewTask()">Add Task</button>
+                    </div>
+                    <button class="action-btn email-btn" style="width:100%; margin-top:0.75rem;" onclick="emailCompiledTaskList()">✉ Email This Task List to Me</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. SYSTEM SECURITY IDENTIFICATION CREDENTIALS
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtHlG5gjfVpIOeH6Fa0nsJZ8ny6N34MuA",
+            authDomain: "apexlearning-f3ba6.firebaseapp.com",
+            databaseURL: "https://apexlearning-f3ba6-default-rtdb.firebaseio.com",
+            projectId: "apexlearning-f3ba6",
+            storageBucket: "apexlearning-f3ba6.firebasestorage.app",
+            messagingSenderId: "211224830937",
+            appId: "1:211224830937:web:48eabc49ba6810dafeafc8",
+            measurementId: "G-692K9DV0XF"
+        };
+
+        // Initialize EmailJS with your Public Key
+        emailjs.init({ publicKey: "g2lS2oiq_5piQ979o" });
+
+        // Initialize Firebase Web Core Apps Safely
+        firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        // Local State Trackers for Email Compilation
+        let activeTasksArray = [];
+
+        // ==========================================
+        // 2. BACKEND STORAGE NOTES TRANSCEIVER PIPELINE
+        // ==========================================
+        window.uploadNotes = function() {
+            const currentText = document.getElementById('notepadMemo').value;
+            updateStatusText("Syncing Note...");
+            
+            rtdb.ref("sharedWorkspace/notepad").set({
+                text: currentText,
+                lastModified: Date.now()
+            }).then(() => updateStatusText("Ecosystem Connected"))
+              .catch(() => updateStatusText("Sync Error"));
+        };
+
+        // Snapshot Listener: Intercepts updates to keep windows unified instantly
+        rtdb.ref("sharedWorkspace/notepad").on("value", (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById('notepadMemo').value = data.text || '';
+            }
+        });
+
+        // ==========================================
+        // 3. TARGET TASK MATRIX MANAGEMENT
+        // ==========================================
+        window.commitNewTask = function() {
+            const rawText = document.getElementById('taskInputField').value.trim();
+            if(!rawText) return;
+            
+            rtdb.ref("tasks").push({
+                title: rawText,
+                checked: false,
+                created: Date.now()
+            });
+            document.getElementById('taskInputField').value = '';
+        };
+
+        window.statusUpdateTask = function(id, state) {
+            rtdb.ref("tasks/" + id).update({ checked: !state });
+        };
+
+        rtdb.ref("tasks").on("value", (snapshot) => {
+            const box = document.getElementById('taskListViewbox');
+            box.innerHTML = '';
+            activeTasksArray = [];
+            
+            snapshot.forEach((childSnapshot) => {
+                const id = childSnapshot.key;
+                const item = childSnapshot.val();
+                activeTasksArray.push(`${item.checked ? '[Done]' : '[Pending]'} ${item.title}`);
+                
+                const div = document.createElement('div');
+                div.className = 'task-row';
+                div.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onclick="statusUpdateTask('${id}', ${item.checked})">
+                    <span class="task-text" style="${item.checked ? 'text-decoration: line-through; opacity: 0.5;' : ''}">${item.title}</span>
+                `;
+                box.appendChild(div);
+            });
+        });
+
+        // ==========================================
+        // 4. UNIFIED MAIL DELIVERY PROTOCOLS
+        // ==========================================
+        window.dispatchEmail = function(subject, messageBody) {
+            if(!messageBody || messageBody.trim() === "") return alert("Content area is empty. Write or sync something first!");
+            updateStatusText("Sending Email...");
+
+            const parameters = {
+                to_email: "hs9381332@gmail.com",
+                email_subject: subject,
+                message: messageBody
+            };
+
+            emailjs.send("service_y0tmb2j", "template_awd5snr", parameters)
+                .then(() => {
+                    alert("Success! The document was cleanly transmitted to your email inbox.");
+                    updateStatusText("Ecosystem Connected");
+                })
+                .catch((error) => {
+                    console.error("EmailJS Error details:", error);
+                    alert("Mail Delivery Failed. Check your EmailJS service credentials.");
+                    updateStatusText("Ecosystem Connected");
+                });
+        };
+
+        window.emailCompiledTaskList = function() {
+            if(activeTasksArray.length === 0) return alert("Your task list is empty.");
+            const body = "Here is your compiled task list synchronized from your cloud terminal:\n\n" + activeTasksArray.join("\n");
+            window.dispatchEmail("Synced Task List Matrix Report", body);
+        };
+
+        function updateStatusText(text) {
+            document.getElementById('statusIndicator').textContent = text;
+        }
+    </script>
+</body>
+</html>

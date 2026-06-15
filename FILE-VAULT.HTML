@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Core - Shared File Vault</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent: #eab308;
+            --canvas: #f1f5f9;
+            --card: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --user-bubble: #3b82f6;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background-color: var(--canvas); display: flex; min-height: 100vh; overflow: hidden; }
+
+        /* Navigation Sidebar */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; padding: 2rem 1.5rem; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; height: 100vh; }
+        .sidebar-brand { font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; }
+        .sidebar-brand span { color: var(--accent); }
+        .nav-links { list-style: none; margin-bottom: 2rem; }
+        .nav-links li { padding: 0.8rem 1rem; margin-bottom: 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); font-size: 0.95rem; cursor: pointer; transition: all 0.2s; }
+        .nav-links li:hover { background: rgba(255,255,255,0.1); }
+        .nav-links li.active { background-color: var(--accent); color: var(--primary); font-weight: 600; }
+        .nav-links a { text-decoration: none; color: inherit; display: block; width: 100%; height: 100%; }
+        .back-dash-btn { background-color: #475569; color: white; text-align: center; padding: 0.75rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: 600; margin-top: auto; transition: background 0.2s; }
+        .back-dash-btn:hover { background-color: #334155; }
+
+        /* Main Structural Dashboard Viewport */
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100vh; background-color: #f8fafc; }
+        .vault-header { padding: 1.5rem 2.5rem; background: white; border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .vault-header h1 { color: var(--primary); font-size: 1.4rem; }
+        .sync-badge { display: inline-block; background-color: #dcfce7; color: #15803d; padding: 0.35rem 0.85rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bbf7d0; }
+
+        /* File Upload Grid Layout Matrix */
+        .vault-grid { flex: 1; padding: 2rem 2.5rem; display: grid; grid-template-columns: 1fr; gap: 2rem; overflow-y: auto; }
+        
+        .panel-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+        .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        
+        /* Drag-Drop Style File Selector zone */
+        .file-drop-zone { border: 2px dashed #cbd5e1; padding: 2.5rem; border-radius: 8px; text-align: center; background: #f8fafc; cursor: pointer; transition: background 0.2s; margin-bottom: 1rem; }
+        .file-drop-zone:hover { background: #f1f5f9; border-color: var(--user-bubble); }
+        .file-input-hidden { display: none; }
+
+        .action-btn { background-color: var(--primary); color: white; border: none; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; border-radius: 6px; cursor: pointer; transition: background 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; }
+        .action-btn:hover { background-color: var(--sidebar-bg); }
+        .email-btn { background-color: var(--user-bubble); }
+        .email-btn:hover { background-color: #2563eb; }
+        .download-btn { background-color: var(--success); }
+        .download-btn:hover { background-color: #059669; }
+
+        /* Shared File Directory List UI */
+        .file-list { margin-top: 1rem; max-height: 400px; overflow-y: auto; }
+        .file-row { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.6rem; }
+        .file-info { display: flex; flex-direction: column; gap: 0.2rem; }
+        .file-name { font-size: 0.95rem; font-weight: 600; color: var(--text-dark); }
+        .file-meta { font-size: 0.75rem; color: #64748b; }
+        .file-actions { display: flex; gap: 0.5rem; align-items: center; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">Gemini<span>Core</span></div>
+            <ul class="nav-links">
+                <li><a href="ai-companion.html">AI Cloud Terminal</a></li>
+                <li><a href="vault.html">Cloud Vault</a></li>
+                <li class="active">Shared File Hub</li>
+                <li><a href="codju.html">Codju Portal</a></li>
+                <li><a href="Merit box.html">Merit Box</a></li>
+                <li><a href="Merit books.html">Merit Books Vault</a></li>
+            </ul>
+        </div>
+        <a href="dashboard.html" class="back-dash-btn">← Back to Dashboard</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="vault-header">
+            <h1>Shared Ecosystem Vault <span>// Free Cross-Device Data File Hub</span></h1>
+            <span class="sync-badge" id="statusIndicator">Ecosystem Connected</span>
+        </div>
+
+        <div class="vault-grid">
+            <div class="panel-card">
+                <div>
+                    <div class="panel-title">Upload & Share Any Document (Free Zero-Cost Pipeline)</div>
+                    <div class="file-drop-zone" onclick="document.getElementById('fileSelector').click()">
+                        <p id="dropZoneText">🎯 Click here to select any image, PDF, or file (Max 2MB for stability)</p>
+                        <input type="file" id="fileSelector" class="file-input-hidden" onchange="processFreeFileUpload(this.files[0])">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="panel-title">Ecosystem Live File Matrix</div>
+                    <div class="file-list" id="fileDirectoryListView">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. SYSTEM SECURITY IDENTIFICATION CREDENTIALS
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtHlG5gjfVpIOeH6Fa0nsJZ8ny6N34MuA",
+            authDomain: "apexlearning-f3ba6.firebaseapp.com",
+            databaseURL: "https://apexlearning-f3ba6-default-rtdb.firebaseio.com",
+            projectId: "apexlearning-f3ba6",
+            storageBucket: "apexlearning-f3ba6.firebasestorage.app",
+            messagingSenderId: "211224830937",
+            appId: "1:211224830937:web:48eabc49ba6810dafeafc8",
+            measurementId: "G-692K9DV0XF"
+        };
+
+        // Initialize EmailJS with your verified public key
+        emailjs.init({ publicKey: "g2lS2oiq_5piQ979o" });
+
+        // Initialize Firebase Apps
+        firebase.initializeApp(firebaseConfig);
+        const rtdb = firebase.database();
+
+        // ==========================================
+        // 2. FREE ZERO-COST DATABASE BINARY STREAM PIPELINE
+        // ==========================================
+        window.processFreeFileUpload = function(file) {
+            if(!file) return;
+
+            // Enforce safe database memory storage size constraints (Keep under 2MB for performance stability)
+            if(file.size > 2 * 1024 * 1024) {
+                return alert("File is too large. Please select a file under 2MB to keep database syncing lightning fast!");
+            }
+
+            updateStatusText("Converting File...");
+            document.getElementById('dropZoneText').textContent = `⌛ Encoding: ${file.name}...`;
+
+            // Convert raw asset chunk into string database representations
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                const base64StringData = reader.result; // This holds the whole file as safe clean text data
+
+                updateStatusText("Syncing File To Core...");
+                
+                // Write directly to your free realtime database tree node
+                rtdb.ref("freeSharedFilesHub").push({
+                    fileName: file.name,
+                    fileSize: (file.size / 1024).toFixed(1) + " KB",
+                    fileRawData: base64StringData,
+                    uploadedAt: Date.now()
+                }).then(() => {
+                    alert("Success! File securely packed and synchronized inside your free database node.");
+                    resetUploadZone();
+                }).catch((err) => {
+                    console.error(err);
+                    alert("Database injection failed. Confirm your Firebase rules tab matches setup guides.");
+                    resetUploadZone();
+                });
+            };
+            reader.onerror = function (error) {
+                console.error("Reader Core Error: ", error);
+                resetUploadZone();
+            };
+        };
+
+        function resetUploadZone() {
+            updateStatusText("Ecosystem Connected");
+            document.getElementById('dropZoneText').textContent = "🎯 Click here to select any image, PDF, or file (Max 2MB)";
+            document.getElementById('fileSelector').value = "";
+        }
+
+        // ==========================================
+        // 3. ECOSYSTEM LIVE SYNC DATA RECEIVER TREE
+        // ==========================================
+        rtdb.ref("freeSharedFilesHub").on("value", (snapshot) => {
+            const container = document.getElementById('fileDirectoryListView');
+            container.innerHTML = '';
+            
+            if(!snapshot.exists()) {
+                container.innerHTML = `<p style="font-size:0.9rem; color:#64748b; text-align:center; padding:1rem;">No shared files stored in this free matrix node.</p>`;
+                return;
+            }
+
+            snapshot.forEach((childSnapshot) => {
+                const id = childSnapshot.key;
+                const record = childSnapshot.val();
+
+                const row = document.createElement('div');
+                row.className = 'file-row';
+                row.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-name">📄 ${record.fileName}</span>
+                        <span class="file-meta">Size: ${record.fileSize} // Shared Realtime</span>
+                    </div>
+                    <div class="file-actions">
+                        <button class="action-btn download-btn" onclick="triggerLocalFileDownload('${record.fileName}', '${record.fileRawData}')">⬇ Download</button>
+                        <button class="action-btn email-btn" onclick="emailFileAttachmentNotify('${record.fileName}')">✉ Send Notification</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        });
+
+        // Reconstruct string patterns directly out into browser download triggers
+        window.triggerLocalFileDownload = function(fileName, base64Data) {
+            const downloadLinkAnchor = document.createElement("a");
+            downloadLinkAnchor.href = base64Data;
+            downloadLinkAnchor.download = fileName;
+            document.body.appendChild(downloadLinkAnchor);
+            downloadLinkAnchor.click();
+            document.body.removeChild(downloadLinkAnchor);
+        };
+
+        // ==========================================
+        // 4. UNIFIED MAIL DELIVERY ROUTING SYSTEM
+        // ==========================================
+        window.emailFileAttachmentNotify = function(fileName) {
+            updateStatusText("Routing Email...");
+            
+            const emailParameters = {
+                to_email: "hs9381332@gmail.com",
+                email_subject: "Ecosystem Share Notification: " + fileName,
+                message: `Attention: The file titled "${fileName}" was successfully uploaded and is sitting inside your Shared Ecosystem File Vault waiting for local download extraction loops.`
+            };
+
+            emailjs.send("service_y0tmb2j", "template_awd5snr", emailParameters)
+                .then(() => {
+                    alert("Notification safely routed directly to your personal email inbox.");
+                    updateStatusText("Ecosystem Connected");
+                })
+                .catch((error) => {
+                    console.error("EmailJS Error: ", error);
+                    alert("Email infrastructure delivery issue occurred.");
+                    updateStatusText("Ecosystem Connected");
+                });
+        };
+
+        function updateStatusText(text) {
+            document.getElementById('statusIndicator').textContent = text;
+        }
+    </script>
+</body>
+</html>
