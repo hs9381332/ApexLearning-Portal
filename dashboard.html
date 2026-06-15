@@ -17,7 +17,6 @@
             --purple-btn: #8b5cf6;
             --emerald-btn: #10b981;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background-color: var(--canvas); display: flex; min-height: 100vh; }
 
@@ -56,7 +55,6 @@
 
         .admin-card { background: var(--card); border-radius: 12px; padding: 2.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); max-width: 700px; margin-bottom: 2rem; }
         .admin-card h2 { margin-bottom: 1.5rem; color: var(--primary); font-size: 1.4rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; }
-        
         .info-grid { display: grid; grid-template-columns: 180px 1fr; gap: 1.2rem; font-size: 1.05rem; }
         .info-label { font-weight: 700; color: #64748b; }
         .info-value { color: var(--primary); font-weight: 500; }
@@ -99,9 +97,7 @@
         .error-notification { background-color: var(--error); color: white; padding: 0.75rem 1rem; border-radius: 6px; font-weight: 600; display: none; margin-top: 1rem; max-width: 400px; text-align: center; }
     </style>
 </head>
-<body>
-
-    <!-- Left System Navigation Layout -->
+<body onload="initData()">
     <aside class="sidebar">
         <div>
             <div class="sidebar-brand">Admin<span>Suite</span></div>
@@ -112,15 +108,14 @@
                 <li id="menuDiagnostics" onclick="switchPanel('diagnostics')">System Diagnostics</li>
                 <li id="menuSettings" onclick="switchPanel('settings')">System Configuration</li>
                 
+                <li><a href="cloud.html">Cloud Drive</a></li>
+                <li><a href="file-vault.html">File Vault</a></li>
                 <li><a href="codju.html">Codju Portal</a></li>
                 <li><a href="Merit box.html">Merit Box</a></li>
                 <li><a href="Merit books.html">Merit Books Vault</a></li>
                 <li><a href="ai.html">AI Cloud Terminal</a></li>
-                <li><a href="cloud.html">Cross-Device Document Center</a></li>
-                <li><a href="FILE-VAULT.HTML">Cross-Device Data File Hub</a></li>
             </ul>
 
-            <!-- PERSISTENT STOPWATCH SUBMODULE -->
             <div class="timer-card">
                 <h4>Session Tracker</h4>
                 <div id="stopwatchDisplay" class="timer-display">00:00:00</div>
@@ -134,14 +129,12 @@
         <a href="index.html" class="logout-btn">Exit Secure Terminal</a>
     </aside>
 
-    <!-- Main Active Canvas Framework -->
     <main class="main-content">
         <div class="dash-header">
             <h1 id="panelTitle">Administrative Management</h1>
             <span class="status-badge">System Connected</span>
         </div>
 
-        <!-- VIEW 1: CENTRAL ADMINISTRATIVE READOUTS -->
         <div id="panelProfile" class="dashboard-panel active">
             <div class="admin-card">
                 <h2>Authorized Profile Metadata</h2>
@@ -166,7 +159,6 @@
             </div>
         </div>
 
-        <!-- VIEW 2: DAILY NOTES & TASK REGISTRY -->
         <div id="panelNotes" class="dashboard-panel">
             <div class="admin-card">
                 <h2>Administrative Notepad Scratchpad</h2>
@@ -184,44 +176,41 @@
             </div>
         </div>
 
-        <!-- VIEW 3: DIGITAL VAULT DOCUMENTS HUB -->
-        <div id="panelDocuments" class="dashboard-panel">            
-            <div class="admin-card">                
-                <h2>Upload Secure Documents</h2>                
-                <form id="documentForm">                    
-                    <div class="form-input-group">                        
-                        <label for="docCustomName">Document Reference Name</label>                        
-                        <input type="text" id="docCustomName" required placeholder="e.g. Identity Proof, Homework Sheet, Syllabus Paper">                    
-                    </div>                    
-                    <div class="form-input-group">                        
-                        <label for="docFileInput">Select File from Computer</label>                        
-                        <input type="file" id="docFileInput" required>                    
-                    </div>                    
-                    <button type="submit" class="action-btn" style="background-color: var(--purple-btn);">Upload & Store Document</button>                    
-                    <div id="docToast" class="toast-notification">Document encrypted and stored successfully!</div>                
-                </form>            
-            </div>            
-            <div class="admin-card" style="max-width: 850px;">                
-                <h2>Stored System Documents</h2>                
-                <div style="overflow-x: auto;">                    
-                    <table class="doc-table">                        
-                        <thead>                            
-                            <tr>                                
-                                <th>Reference Name</th>                                
-                                <th>Original File Name</th>                                
-                                <th>File Size</th>                                
-                                <th>Actions</th>                            
-                            </tr>                        
-                        </thead>                        
-                        <tbody id="documentTableBody">                            
-                            <!-- Dynamic rows inject here -->                        
-                        </tbody>                    
-                    </table>                
-                </div>            
-            </div>        
+        <div id="panelDocuments" class="dashboard-panel">
+            <div class="admin-card">
+                <h2>Upload Secure Documents</h2>
+                <form id="documentForm">
+                    <div class="form-input-group">
+                        <label for="docCustomName">Document Reference Name</label>
+                        <input type="text" id="docCustomName" required placeholder="e.g. Identity Proof, Homework Sheet, Syllabus Paper">
+                    </div>
+                    <div class="form-input-group">
+                        <label for="docFileInput">Select File from Computer</label>
+                        <input type="file" id="docFileInput" required>
+                    </div>
+                    <button type="submit" class="action-btn" style="background-color: var(--purple-btn);">Upload & Store Document</button>
+                    <div id="docToast" class="toast-notification">Document encrypted and stored successfully!</div>
+                </form>
+            </div>
+            <div class="admin-card" style="max-width: 850px;">
+                <h2>Stored System Documents</h2>
+                <div style="overflow-x: auto;">
+                    <table class="doc-table">
+                        <thead>
+                            <tr>
+                                <th>Reference Name</th>
+                                <th>Original File Name</th>
+                                <th>File Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <!-- VIEW 4: SYSTEM DIAGNOSTICS & ANALYTICS -->
         <div id="panelDiagnostics" class="dashboard-panel">
             <div class="admin-card">
                 <h2>Local Environment Telemetry</h2>
@@ -242,7 +231,6 @@
             </div>
         </div>
 
-        <!-- VIEW 5: SECURITY MODIFIERS & OPTIONS HUB -->
         <div id="panelSettings" class="dashboard-panel">
             <div class="admin-card">
                 <h2>System Parameters Modification Panel</h2>
@@ -565,53 +553,49 @@
             localStorage.setItem('adminNotepadData', e.target.value);
         });
 
+        // MISSION CHECKSUBMIT TODO CONTROLLER 
         document.getElementById('todoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const input = document.getElementById('todoInput');
-            let todoList = JSON.parse(localStorage.getItem('adminTodoList')) || [];
-            todoList.push({ id: Date.now(), text: input.value.trim(), done: false });
-            localStorage.setItem('adminTodoList', JSON.stringify(todoList));
+            let todos = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            todos.push({ text: input.value.trim(), completed: false });
+            localStorage.setItem('adminTodoList', JSON.stringify(todos));
             input.value = '';
             renderTodoList();
         });
 
         function renderTodoList() {
-            const list = document.getElementById('todoListElement');
-            list.innerHTML = '';
-            let todoList = JSON.parse(localStorage.getItem('adminTodoList')) || [];
-            if(todoList.length === 0) {
-                list.innerHTML = `<li style="color:#94a3b8; font-style:italic; font-size:0.95rem; padding:0.5rem 0;">No pending goals logged.</td>`;
+            const listEl = document.getElementById('todoListElement');
+            if(!listEl) return;
+            let todos = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            if(todos.length === 0) {
+                listEl.innerHTML = `<li style="color:#94a3b8; font-style:italic; padding: 0.5rem 0;">No pending objectives recorded.</li>`;
                 return;
             }
-            todoList.forEach(item => {
-                const li = document.createElement('li');
-                li.className = "todo-item";
-                li.innerHTML = `
+            listEl.innerHTML = todos.map((t, idx) => `
+                <li class="todo-item">
                     <div class="todo-checkbox-wrapper">
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onclick="toggleTodo(${item.id})">
-                        <span class="todo-text ${item.done ? 'completed' : ''}">${item.text}</span>
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTodo(${idx})">
+                        <span class="todo-text ${t.completed ? 'completed' : ''}">${t.text}</span>
                     </div>
-                    <button class="todo-del-btn" onclick="deleteTodo(${item.id})">&times;</button>
-                `;
-                list.appendChild(li);
-            });
+                    <button type="button" class="todo-del-btn" onclick="deleteTodo(${idx})">&times;</button>
+                </li>
+            `).join('');
         }
 
-        function toggleTodo(id) {
-            let list = JSON.parse(localStorage.getItem('adminTodoList')) || [];
-            list = list.map(i => i.id === id ? { ...i, done: !i.done } : i);
-            localStorage.setItem('adminTodoList', JSON.stringify(list));
+        function toggleTodo(idx) {
+            let todos = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            todos[idx].completed = !todos[idx].completed;
+            localStorage.setItem('adminTodoList', JSON.stringify(todos));
             renderTodoList();
         }
 
-        function deleteTodo(id) {
-            let list = JSON.parse(localStorage.getItem('adminTodoList')) || [];
-            list = list.filter(i => i.id !== id);
-            localStorage.setItem('adminTodoList', JSON.stringify(list));
+        function deleteTodo(idx) {
+            let todos = JSON.parse(localStorage.getItem('adminTodoList')) || [];
+            todos.splice(idx, 1);
+            localStorage.setItem('adminTodoList', JSON.stringify(todos));
             renderTodoList();
         }
-
-        window.onload = initData;
     </script>
 </body>
 </html>
