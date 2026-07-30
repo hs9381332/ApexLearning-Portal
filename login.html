@@ -75,11 +75,16 @@
             const pass = document.getElementById('password').value;
             const errorDisplay = document.getElementById('errorMessage');
 
-            if (user === "HardeepSingh" && pass === "SidhuHardeep6713@") {
-                window.location.href = "dashboard.html";
-            } else {
-                errorDisplay.style.display = "block";
-            }
+           // Hardcoded credentials check for two admins
+if (
+  (user === "Hardeep" && pass === "Sidhu6713@") ||
+  (user === "Admin" && pass === "12345678")
+) {
+  console.log("Access granted: Admin logged in.");
+  // Add your logic to redirect or grant access here
+} else {
+  console.log("Access denied: Invalid username or password.");
+}
         });
 // Replace the old IF statement inside login.html with this dynamic version:
 const correctUser = "Ha";
