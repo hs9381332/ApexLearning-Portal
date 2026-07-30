@@ -75,20 +75,11 @@
             const pass = document.getElementById('password').value;
             const errorDisplay = document.getElementById('errorMessage');
 
-           // Hardcoded credentials check for two admins
-if (
-  (user === "Hardeep" && pass === "Sidhu6713@") ||
-  (user === "Admin" && pass === "12345678")
-) {
-  console.log("Access granted: Admin logged in.");
-  // Add your logic to redirect or grant access here
-} else {
-  console.log("Access denied: Invalid username or password.");
-}
+         if (user === "Hardeep" && pass === "Sidhu6713@")
         });
 // Replace the old IF statement inside login.html with this dynamic version:
 const correctUser = "Ha";
-const correctPass = localStorage.getItem('adminPassword') || "SidhuHardeep6713@";
+const correctPass = localStorage.getItem('adminPassword') || "Sidhu6713@";
 
 if (user === correctUser && pass === correctPass) {
     errorDisplay.style.display = "none";
