@@ -15,8 +15,30 @@
             --error-color: #ef4444;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background-color: var(--bg-canvas); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
-        .login-container { background: #ffffff; width: 100%; max-width: 450px; padding: 2.5rem; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        body { 
+            background-color: #cccccc;
+            background-image: url('1.jpeg'); 
+            background-repeat: no-repeat; 
+            background-position: center; 
+            background-size: cover; 
+            background-attachment: fixed; 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1.5rem; 
+        }
+
+        .login-container { 
+            background: #ffffff; 
+            width: 100%; 
+            max-width: 450px; 
+            padding: 2.5rem; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); 
+        }
+        
         .form-header { margin-bottom: 2rem; text-align: center; }
         .form-header h1 { font-size: 1.75rem; color: var(--primary-dark); margin-bottom: 0.5rem; }
         .form-header p { color: var(--text-muted); font-size: 0.95rem; }
@@ -27,25 +49,6 @@
         .error-msg { color: var(--error-color); font-size: 0.9rem; margin-bottom: 1rem; display: none; text-align: center; font-weight: 500; }
         .submit-btn { width: 100%; background-color: var(--primary-dark); color: white; border: none; padding: 1rem; font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
         .submit-btn:hover { background-color: var(--primary-light); }
-        body { 
-            /* Replace with your image URL or file path */
-            background-image: url('1.jpeg'); 
-            
-            /* Prevents the image from repeating like a grid */
-            background-repeat: no-repeat; 
-            
-            /* Centers the image on the screen */
-            background-position: center; 
-            
-            /* Scales the image to completely cover the page */
-            background-size: cover; 
-            
-            /* Keeps the background fixed while scrolling */
-            background-attachment: fixed; 
-            
-            /* Sets a fallback color if the image fails to load */
-            background-color: #cccccc; 
-        }
     </style>
 </head>
 <body>
@@ -71,22 +74,23 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
+
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
             const errorDisplay = document.getElementById('errorMessage');
 
-         if (user === "Hardeep" && pass === "Sidhu6713@")
-        });
-// Replace the old IF statement inside login.html with this dynamic version:
-const correctUser = "Ha";
-const correctPass = localStorage.getItem('adminPassword') || "Sidhu6713@";
+            // Dynamic credentials or fallbacks
+            const correctUser = "HardeepSingh";
+            const correctPass = localStorage.getItem('adminPassword') || "SidhuHardeep6713@";
 
-if (user === correctUser && pass === correctPass) {
-    errorDisplay.style.display = "none";
-    window.location.href = "dashboard.html";
-} else {
-    errorDisplay.style.display = "block";
-}
+            // Check primary admin OR second dynamic admin
+            if ((user === "HardeepSingh" && pass === "SidhuHardeep6713@") || (user === correctUser && pass === correctPass)) {
+                errorDisplay.style.display = "none";
+                window.location.href = "dashboard.html"; // Redirects to full-screen page/dashboard
+            } else {
+                errorDisplay.style.display = "block";
+            }
+        });
     </script>
 </body>
 </html>
