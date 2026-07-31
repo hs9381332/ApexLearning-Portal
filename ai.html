@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Core - Live Google AI Terminal</title>
+    <title>AI Core - Live Google AI Terminal</title>
     <style>
         :root {
             --primary: #0f172a;
@@ -16,7 +16,6 @@
             --ai-bubble: #1e293b;
             --user-bubble: #3b82f6;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background-color: var(--canvas); display: flex; min-height: 100vh; }
 
@@ -66,15 +65,6 @@
         /* Thinking State */
         .thinking-bubble { display: none; align-self: flex-start; background: #e2e8f0; color: #334155; padding: 1rem 1.25rem; border-radius: 12px; border-top-left-radius: 2px; font-size: 0.95rem; font-style: italic; }
     </style>
-
-    <!-- IMPORTING GOOGLE'S OFFICIAL GEN AI SDK FOR BROWSERS -->
-    <script type="importmap">
-      {
-        "imports": {
-          "@google/genai": "https://esm.run/@google/genai"
-        }
-      }
-    </script>
 </head>
 <body>
 
@@ -96,7 +86,7 @@
     <main class="main-content">
         <div class="ai-header">
             <h1>Gemini Live API Interface</h1>
-            <span class="engine-badge">Gemini 2.5 Flash Connected</span>
+            <span class="engine-badge">Gemini 2.0 Flash Connected</span>
         </div>
 
         <div id="chatContainer" class="chat-container">
@@ -127,15 +117,10 @@
         </div>
     </main>
 
-    <script type="module">
-        // Importing Google's Generative AI client module
-        import { GoogleGenAI } from '@google/genai';
-
-        // PLACE YOUR GOOGLE AI STUDIO API KEY HERE
-        const API_KEY = "AIzaSyAkYUO0sf0NUwc4ojgl2doEZ4s4-qXbfnU";
-
-        // Initializing the real Google AI client backbone framework
-        const ai = new GoogleGenAI({ apiKey: API_KEY });
+    <script>
+        // Replace with your Google AI Studio API key
+        const API_KEY = "AQ.Ab8RN6KhSSOnmckWdJ2fSQn8DevdNPJGgZTn7bDD-FamoQI_fQ";
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
         document.getElementById('initialTime').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
@@ -145,13 +130,13 @@
         const thinkingBubble = document.getElementById('thinkingBubble');
 
         userInput.addEventListener('keydown', function(e) {
-            if(e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 chatForm.requestSubmit();
             }
         });
 
-        window.applySuggestion = function(text) {
+        function applySuggestion(text) {
             userInput.value = text;
             userInput.focus();
         }
@@ -159,26 +144,39 @@
         chatForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const messageText = userInput.value.trim();
-            if(!messageText) return;
+            if (!messageText) return;
 
-            // 1. Render user text bubble onscreen instantly
+            // 1. Render user message bubble
             appendMessage("User Operator", messageText, "message-user");
             userInput.value = '';
-            
             showThinkingState(true);
-            
+
             try {
-                // 2. Making a direct live connection request to Google AI Studio API servers
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: messageText,
+                // 2. Direct browser-compatible REST request
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: messageText }]
+                        }]
+                    })
                 });
 
+                const data = await response.json();
                 showThinkingState(false);
-                
-                // 3. Render real AI answer response text directly into the page stream layout
-                if (response && response.text) {
-                    appendMessage("Gemini Core", response.text, "message-ai");
+
+                if (data.error) {
+                    appendMessage("System Error", data.error.message || "An API error occurred.", "message-error");
+                    return;
+                }
+
+                // 3. Extract text from API response
+                const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (replyText) {
+                    appendMessage("Gemini Core", replyText, "message-ai");
                 } else {
                     appendMessage("System Error", "Received an empty response packet from the API.", "message-error");
                 }
@@ -186,7 +184,7 @@
             } catch (error) {
                 showThinkingState(false);
                 console.error(error);
-                appendMessage("System Error", "Connection failed. Please verify that your Google AI Studio API key is copied accurately inside the script code.", "message-error");
+                appendMessage("System Error", "Connection failed. Please check your internet connection or API key.", "message-error");
             }
         });
 
@@ -194,7 +192,7 @@
             const timeString = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             const msgDiv = document.createElement('div');
             msgDiv.className = `chat-message ${className}`;
-            
+
             const senderTag = document.createElement('div');
             senderTag.className = 'sender-tag';
             senderTag.textContent = sender;
@@ -210,14 +208,14 @@
             msgDiv.appendChild(senderTag);
             msgDiv.appendChild(textContainer);
             msgDiv.appendChild(timeTag);
-            
+
             chatContainer.insertBefore(msgDiv, thinkingBubble);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         function showThinkingState(shouldShow) {
             thinkingBubble.style.display = shouldShow ? 'block' : 'none';
-            if(shouldShow) chatContainer.scrollTop = chatContainer.scrollHeight;
+            if (shouldShow) chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     </script>
 </body>
